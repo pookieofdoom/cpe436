@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">HelloWorld</string>
+    <string name="bio">Hello, my name is Anthony Dinh. I am a 5th year CPE (super senior!). I will
+    hopefully be graduating at the end of this quarter. Some programming languages I know are
+    C, C#, Java, and Python. Hobbies I enjoy include playing badminton in the Cal Poly Badminton
+    Club and speed solving rubik\'s cubes.</string>
+</resources>
