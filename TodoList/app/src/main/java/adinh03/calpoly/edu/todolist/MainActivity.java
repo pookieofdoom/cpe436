@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
       editText = (EditText) findViewById(R.id.entryText);
+      editText.clearFocus();
       submitButton = (Button) findViewById(R.id.submitButton);
       inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
       mList = (LinearLayout) findViewById(R.id.list_layout);
@@ -62,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
          @Override
          public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-            if (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN ||
+                  i == EditorInfo.IME_ACTION_DONE) {
                String entry = editText.getText().toString();
                if (!entry.isEmpty()) {
                   addListEntry(entry);
@@ -95,11 +97,20 @@ public class MainActivity extends AppCompatActivity {
          inflater = LayoutInflater.from(this);
          v = inflater.inflate(R.layout.todoentry, mList, false);
          TextView addText = (TextView) v.findViewById(R.id.newText);
-         CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkBox);
          addText.setText(entryList.get(i).getAddText());
-         checkBox.setChecked(entryList.get(i).isChecked());
-         Log.d("DEBUG", "text = " + addText.getText() + " and check is: " + checkBox.isChecked());
          mList.addView(v);
+      }
+      for (int i = 0; i < mList.getChildCount(); i++) {
+         View nextChild = mList.getChildAt(i);
+         CheckBox checkBox = (CheckBox) nextChild.findViewById(R.id.checkBox);
+         if (entryList.get(i).isChecked()) {
+            Log.d("DEBUG", "SETTING TO TRUE");
+            checkBox.setChecked(true);
+         }
+         else {
+            Log.d("DEBUG", "SETTING TO FALSE");
+            checkBox.setChecked(false);
+         }
       }
       entryList.clear();
    }
@@ -109,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
          View nextChild = ((ViewGroup) mList).getChildAt(i);
          TextView addText = (TextView) nextChild.findViewById(R.id.newText);
          CheckBox checkBox = (CheckBox) nextChild.findViewById(R.id.checkBox);
+         Log.d("DEBUG", "SAVING: text = " + addText.getText() + " and check is: " + checkBox.isChecked());
          entryList.add(new EntryList(addText.getText().toString(), checkBox.isChecked()));
 
       }
@@ -121,4 +133,5 @@ public class MainActivity extends AppCompatActivity {
       saveToEntryList();
       return entryList;
    }
+
 }
