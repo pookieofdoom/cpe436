@@ -41,10 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
       if (entryList == null) {
          entryList = new ArrayList<EntryList>();
-      } else {
-         //repopulate the todo list
-         repopulateEntry();
-
       }
 
       submitButton.setOnClickListener(new View.OnClickListener() {
@@ -93,25 +89,15 @@ public class MainActivity extends AppCompatActivity {
       View v;
 
       for (int i = 0; i < entryList.size(); i++) {
-
          inflater = LayoutInflater.from(this);
          v = inflater.inflate(R.layout.todoentry, mList, false);
          TextView addText = (TextView) v.findViewById(R.id.newText);
          addText.setText(entryList.get(i).getAddText());
+         CheckBox checkbox = (CheckBox) v.findViewById(R.id.checkBox);
+         checkbox.setChecked(entryList.get(i).isChecked());
          mList.addView(v);
       }
-      for (int i = 0; i < mList.getChildCount(); i++) {
-         View nextChild = mList.getChildAt(i);
-         CheckBox checkBox = (CheckBox) nextChild.findViewById(R.id.checkBox);
-         if (entryList.get(i).isChecked()) {
-            Log.d("DEBUG", "SETTING TO TRUE");
-            checkBox.setChecked(true);
-         }
-         else {
-            Log.d("DEBUG", "SETTING TO FALSE");
-            checkBox.setChecked(false);
-         }
-      }
+
       entryList.clear();
    }
 
@@ -120,11 +106,14 @@ public class MainActivity extends AppCompatActivity {
          View nextChild = ((ViewGroup) mList).getChildAt(i);
          TextView addText = (TextView) nextChild.findViewById(R.id.newText);
          CheckBox checkBox = (CheckBox) nextChild.findViewById(R.id.checkBox);
-         Log.d("DEBUG", "SAVING: text = " + addText.getText() + " and check is: " + checkBox.isChecked());
          entryList.add(new EntryList(addText.getText().toString(), checkBox.isChecked()));
-
       }
+   }
 
+   @Override
+   protected void onRestoreInstanceState(Bundle savedInstanceState) {
+      super.onRestoreInstanceState(savedInstanceState);
+      repopulateEntry();
    }
 
    @Override
