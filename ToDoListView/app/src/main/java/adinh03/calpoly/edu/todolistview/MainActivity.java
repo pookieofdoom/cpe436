@@ -2,10 +2,15 @@ package adinh03.calpoly.edu.todolistview;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.CheckBox;
 
 import java.util.ArrayList;
 
@@ -29,7 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
       mListView = (ListView) findViewById(R.id.listView);
 
-      entryList = new ArrayList<>();
+      entryList = (ArrayList<EntryList>) getLastCustomNonConfigurationInstance();
+      if (entryList == null)
+         entryList = new ArrayList<>();
 
       adapter = new MyAdapter(entryList);
 
@@ -39,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
          @Override
          public void onClick(View view) {
             String entry = editText.getText().toString();
-            if (adapter.getCount() == 0) {
-               adapter.
+            if (!entry.trim().isEmpty()) {
+               addListEntry(entry);
             }
             editText.setText("");
          }
@@ -54,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             if (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN ||
                   i == EditorInfo.IME_ACTION_DONE) {
                String entry = editText.getText().toString();
-               if (!entry.isEmpty()) {
+               if (!entry.trim().isEmpty()) {
                   addListEntry(entry);
                }
 
@@ -67,5 +74,15 @@ public class MainActivity extends AppCompatActivity {
 
    }
 
+   void addListEntry(String newText) {
+      entryList.add(new EntryList(newText, false));
+      //Log.d("DEBUG", "BEFORE NOTIFY SET CHANGED");
+      adapter.notifyDataSetChanged();
+   }
+
+   @Override
+   public Object onRetainCustomNonConfigurationInstance() {
+      return entryList;
+   }
 
 }
