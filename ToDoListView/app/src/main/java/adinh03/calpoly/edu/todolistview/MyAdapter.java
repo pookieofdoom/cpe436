@@ -1,5 +1,7 @@
 package adinh03.calpoly.edu.todolistview;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +39,7 @@ public class MyAdapter extends BaseAdapter{
    }
 
    @Override
-   public View getView(int i, View view, ViewGroup viewGroup) {
+   public View getView(int i, View view, final ViewGroup viewGroup) {
       //Log.d("DEBUG", "IN GET VIEW");
       final EntryList entry = (EntryList) getItem(i);
 
@@ -46,6 +48,7 @@ public class MyAdapter extends BaseAdapter{
          LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
          view = inflater.inflate(R.layout.todoentry, viewGroup, false);
       }
+
       TextView addText = (TextView) view.findViewById(R.id.newText);
       CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox);
       checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -57,6 +60,32 @@ public class MyAdapter extends BaseAdapter{
       addText.setText(entry.getAddText());
       checkBox.setChecked(entry.isChecked());
       //Log.d("DEBUG", addText.getText().toString());
+      view.setOnLongClickListener(new View.OnLongClickListener() {
+         @Override
+         public boolean onLongClick(View view) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(viewGroup.getContext());
+            alert.setMessage("Do you really want to delete ( " + entry.getAddText()
+                  + " ) 4 ever?");
+            alert.setCancelable(true);
+            alert.setPositiveButton("Yup", new DialogInterface.OnClickListener() {
+               @Override
+               public void onClick(DialogInterface dialogInterface, int i) {
+                  mEntry.remove(entry);
+                  notifyDataSetChanged();
+               }
+            });
+            alert.setNegativeButton("Pls No", new DialogInterface.OnClickListener() {
+               @Override
+               public void onClick(DialogInterface dialogInterface, int i) {
+                  dialogInterface.cancel();
+               }
+            });
+            AlertDialog dialog = alert.create();
+            dialog.show();
+
+            return true;
+         }
+      });
       return view;
    }
 }

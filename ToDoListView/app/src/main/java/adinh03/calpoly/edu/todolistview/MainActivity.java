@@ -1,14 +1,18 @@
 package adinh03.calpoly.edu.todolistview;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.CheckBox;
 
@@ -21,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
    private EditText editText;
    private MyAdapter adapter;
    private ArrayList<EntryList> entryList;
+   private ShareActionProvider mShareActionProvider;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
          @Override
          public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
             if (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN ||
-                  i == EditorInfo.IME_ACTION_DONE) {
+                  i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_NEXT) {
                String entry = editText.getText().toString();
                if (!entry.trim().isEmpty()) {
                   addListEntry(entry);
@@ -72,6 +77,18 @@ public class MainActivity extends AppCompatActivity {
       });
 
 
+
+   }
+
+   String FormatStringsForIntent() {
+      StringBuilder retString = new StringBuilder();
+
+      for (int i = 0; i < entryList.size(); i++) {
+         retString.append(entryList.get(i).getAddText() + "   " +
+               Integer.toString(entryList.get(i).isChecked() ? 1 : 0) + "\n");
+      }
+
+      return retString.toString();
    }
 
    void addListEntry(String newText) {
@@ -83,6 +100,29 @@ public class MainActivity extends AppCompatActivity {
    @Override
    public Object onRetainCustomNonConfigurationInstance() {
       return entryList;
+   }
+
+   @Override
+   public boolean onCreateOptionsMenu(Menu menu) {
+      //return super.onCreateOptionsMenu(menu);
+      getMenuInflater().inflate(R.menu.list_menu, menu);
+      MenuItem item = menu.findItem(R.id.menu_share);
+      item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+         @Override
+         public boolean onMenuItemClick(MenuItem menuItem) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            String formatedString = FormatStringsForIntent();
+            //Log.d("DEBUG", formatedString);
+            sendIntent.putExtra(Intent.EXTRA_TEXT,  formatedString);
+            sendIntent.setType("text/plain");
+            Intent.createChooser(sendIntent, "Pick what to send with");
+            startActivity(sendIntent);
+            return true;
+         }
+      });
+      return true;
+
    }
 
 }
