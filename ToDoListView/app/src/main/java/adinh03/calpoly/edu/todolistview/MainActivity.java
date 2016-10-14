@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             String formatedString = FormatStringsForIntent();
-            //Log.d("DEBUG", formatedString);
+            // Log.d("DEBUG", formatedString);
             sendIntent.putExtra(Intent.EXTRA_TEXT,  formatedString);
             sendIntent.setType("text/plain");
             Intent.createChooser(sendIntent, "Pick what to send with");
