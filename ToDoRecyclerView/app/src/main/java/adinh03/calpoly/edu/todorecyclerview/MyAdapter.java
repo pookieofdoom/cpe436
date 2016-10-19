@@ -35,6 +35,11 @@ public class MyAdapter extends RecyclerView.Adapter<EntryViewHolder>{
 
    @Override
    public int getItemCount() {
-      return 0;
+      return mEntry.size();
+   }
+
+   @Override
+   public int getItemViewType(int position) {
+      return R.layout.todoentry;
    }
 }
