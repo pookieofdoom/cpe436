@@ -122,6 +122,8 @@ public class DetailActivity extends AppCompatActivity {
       }
       else {
          //remove image when pressing back
+         File input = new File(getFilesDir() + "/savedImage" + imageId);
+         input.delete();
          mImageView.setImageResource(0);
       }
    }

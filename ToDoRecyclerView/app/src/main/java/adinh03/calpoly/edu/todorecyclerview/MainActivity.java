@@ -2,9 +2,9 @@ package adinh03.calpoly.edu.todorecyclerview;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -16,10 +16,11 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.firebase.client.Firebase;
+
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
    private EditText editText;
    private MyAdapter myAdapter;
    private ArrayList<EntryList> entryList;
+   private Firebase mRef;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
          entryList = new ArrayList<>();
 
       StaticEntryList.getInstance().setEntry(entryList);
+      mRef = new Firebase("https://todorecyclerview.firebaseio.com/entry");
 
       myAdapter = new MyAdapter(entryList);
 
@@ -79,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
          }
       });
+
+
+
       ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
          @Override
          public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -94,14 +100,24 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
                 alert.setMessage("Do you really want to delete this 4 ever?");
                 alert.setCancelable(true);
-                alert.setPositiveButton("Yup", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialogInterface, int i) {
                       entryList.remove(index);
                       myAdapter.notifyItemRemoved(index);
+                      File input = new File(getFilesDir() + "/savedImage" + index);
+                      input.delete();
+                      //change the index number
+                      for (int num = index + 1; num < entryList.size(); num++) {
+                         File fixFileName = new File(getFilesDir() +  "/savedImage" + num);
+                         File newFileName = new File(getFilesDir() +  "/savedImage" + (num-1));
+                         fixFileName.renameTo(newFileName);
+                      }
+
+
                    }
                 });
-                alert.setNegativeButton("Pls No", new DialogInterface.OnClickListener() {
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialogInterface, int i) {
                       dialogInterface.cancel();

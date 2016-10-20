@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "556602360955",
+    "firebase_url": "https://todorecyclerview.firebaseio.com",
+    "project_id": "todorecyclerview",
+    "storage_bucket": "todorecyclerview.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556602360955:android:d34b2815b892664c",
+        "android_client_info": {
+          "package_name": "adinh03.calpoly.edu.todorecyclerview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556602360955-kb0o2ghvdcv2qls25r7c7s5d5ui0poaf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEEtjZAzeWDKsNC-ySlzLYfINT56UNJqg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
