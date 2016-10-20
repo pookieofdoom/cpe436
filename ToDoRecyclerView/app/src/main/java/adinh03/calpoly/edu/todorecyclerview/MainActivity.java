@@ -1,11 +1,14 @@
 package adinh03.calpoly.edu.todorecyclerview;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
       entryList = (ArrayList<EntryList>) getLastCustomNonConfigurationInstance();
       if (entryList == null)
          entryList = new ArrayList<>();
+
+      StaticEntryList.getInstance().setEntry(entryList);
 
       myAdapter = new MyAdapter(entryList);
 
@@ -81,16 +86,36 @@ public class MainActivity extends AppCompatActivity {
          }
 
          @Override
-         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            int index = viewHolder.getAdapterPosition();
+         public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
+            final int index = viewHolder.getAdapterPosition();
              if (direction == ItemTouchHelper.RIGHT) {
-               Toast.makeText(MainActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+                //need to delete the internal storage and rename all the files inside
+               //Toast.makeText(MainActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                alert.setMessage("Do you really want to delete this 4 ever?");
+                alert.setCancelable(true);
+                alert.setPositiveButton("Yup", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+                      entryList.remove(index);
+                      myAdapter.notifyItemRemoved(index);
+                   }
+                });
+                alert.setNegativeButton("Pls No", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+                      dialogInterface.cancel();
+                      myAdapter.notifyItemChanged(index);
+                   }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
 
-               entryList.remove(index);
-               myAdapter.notifyItemRemoved(index);
             }
 
          }
+
+
       };
 
       ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -136,9 +161,24 @@ public class MainActivity extends AppCompatActivity {
             Intent.createChooser(sendIntent, "Pick what to send with");
             startActivity(sendIntent);
             return true;
+
          }
       });
       return true;
+   }
 
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      //super.onActivityResult(requestCode, resultCode, data);
+
+      if (resultCode == RESULT_OK) {
+         if (requestCode == 1) {
+            int index = data.getIntExtra("key2", -1);
+            Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance().getEntry(index).getAddText() + " back.");
+            entryList.set(index, StaticEntryList.getInstance().getEntry(index));
+            myAdapter.notifyItemChanged(index);
+         }
+
+      }
    }
 }
