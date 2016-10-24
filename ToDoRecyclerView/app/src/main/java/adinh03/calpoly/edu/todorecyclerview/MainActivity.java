@@ -18,10 +18,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
    private RecyclerView mListView;
@@ -29,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
    private EditText editText;
    private MyAdapter myAdapter;
    private ArrayList<EntryList> entryList;
-   private Firebase mRef;
+   private DatabaseReference mDatabase;
+   private HashMap<Integer, String> keyMap;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +48,73 @@ public class MainActivity extends AppCompatActivity {
 
       mListView = (RecyclerView) findViewById(R.id.recyclerView);
       mListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+      keyMap = new HashMap<Integer, String>();
 
       entryList = (ArrayList<EntryList>) getLastCustomNonConfigurationInstance();
       if (entryList == null)
          entryList = new ArrayList<>();
 
       StaticEntryList.getInstance().setEntry(entryList);
-      mRef = new Firebase("https://todorecyclerview.firebaseio.com/entry");
+      mDatabase = FirebaseDatabase.getInstance().getReference("entries");
+      final ValueEventListener databaseListener = new ValueEventListener() {
+         @Override
+         public void onDataChange(DataSnapshot dataSnapshot) {
+            //repopulating entryList
+            if (entryList.isEmpty()) {
+               Log.d("DEBUG", "REPOPULATING DATA FROM FIREBASE");
+               for (DataSnapshot postSnapShot : dataSnapshot.getChildren()) {
+                  Log.d("DEBUG", "Key is: " + postSnapShot.getKey());
+                  Log.d("DEBUG", "child count is" + Long.toString(postSnapShot.getChildrenCount()));
+                  Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class).getAddText());
+                  EntryList a = postSnapShot.getValue(EntryList.class);
+                  entryList.add(a);
+
+               }
+
+            }
+            //updating values in the list
+            else {
+               Log.d("DEBUG", "UPDATING VALUE FROM FIREBAE");
+               for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                  Log.d("DEBUG", postSnapshot.getValue(EntryList.class).getAddText());
+                  entryList.set(Integer.parseInt(postSnapshot.getKey()), postSnapshot.getValue(EntryList.class));
+
+               }
+            }
+
+
+
+            myAdapter.notifyDataSetChanged();
+
+         }
+
+
+         @Override
+         public void onCancelled(DatabaseError databaseError) {
+
+         }
+      };
+
+      final ValueEventListener shiftDatabase = new ValueEventListener() {
+         @Override
+         public void onDataChange(DataSnapshot dataSnapshot) {
+            //shift the keys here
+            Log.d("DEBUG", "AM I IN THIS SHIFT?");
+            for (DataSnapshot postSnapShot : dataSnapshot.getChildren()) {
+               EntryList a = postSnapShot.getValue(EntryList.class);
+               Log.d("DEBUG", "Shift value is "+ a.getAddText());
+
+            }
+         }
+
+         @Override
+         public void onCancelled(DatabaseError databaseError) {
+
+         }
+      };
+      mDatabase.addValueEventListener(databaseListener);
+
+      //mDatabase.child("entries").child("0").push().setValue("dafaq");
 
       myAdapter = new MyAdapter(entryList);
 
@@ -113,6 +179,12 @@ public class MainActivity extends AppCompatActivity {
                          File newFileName = new File(getFilesDir() +  "/savedImage" + (num-1));
                          fixFileName.renameTo(newFileName);
                       }
+                      //remove from firebase but update the keys
+                      mDatabase.removeEventListener(databaseListener);
+                      mDatabase.child(Integer.toString(index)).removeValue();
+                      mDatabase.addValueEventListener(shiftDatabase);
+                      mDatabase.addValueEventListener(databaseListener);
+
 
 
                    }
@@ -140,8 +212,8 @@ public class MainActivity extends AppCompatActivity {
 
    void addListEntry(String newText) {
       entryList.add(new EntryList(newText, false));
-      //Log.d("DEBUG", "BEFORE NOTIFY SET CHANGED");
-      //myAdapter.notifyItemInserted(myAdapter.getItemCount());
+
+      mDatabase.child(Integer.toString(entryList.size() - 1)).setValue(entryList.get(entryList.size()-1));
       myAdapter.notifyDataSetChanged();
    }
 
@@ -192,9 +264,12 @@ public class MainActivity extends AppCompatActivity {
             int index = data.getIntExtra("key2", -1);
             Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance().getEntry(index).getAddText() + " back.");
             entryList.set(index, StaticEntryList.getInstance().getEntry(index));
+            mDatabase.child(Integer.toString(index)).setValue(entryList.get(index));
             myAdapter.notifyItemChanged(index);
          }
 
       }
    }
+
+
 }

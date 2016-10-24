@@ -8,6 +8,9 @@ public class EntryList {
    private String addText;
    private boolean isChecked;
 
+   public EntryList(){
+
+   }
    public EntryList(String addText, boolean isChecked){
       this.addText = addText;
       this.isChecked = isChecked;
