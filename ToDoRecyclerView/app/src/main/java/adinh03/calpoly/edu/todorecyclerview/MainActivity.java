@@ -3,6 +3,7 @@ package adinh03.calpoly.edu.todorecyclerview;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 // trouble deleting stuff from top of list
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements DetailFragment.FragmentInterface
 {
    private RecyclerView mListView;
    private Button submitButton;
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity
    private MyAdapter myAdapter;
    private ArrayList<EntryList> entryList;
    private DatabaseReference mDatabase;
-   private HashMap<Integer, String> keyMap;
+   private boolean mTwoPane;
+   private FragmentManager mManager;
 
    @Override
    protected void onCreate(Bundle savedInstanceState)
@@ -52,7 +54,17 @@ public class MainActivity extends AppCompatActivity
       mListView = (RecyclerView) findViewById(R.id.recyclerView);
       mListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
             false));
-      keyMap = new HashMap<Integer, String>();
+
+      if (findViewById(R.id.fragment_detail) != null)
+      {
+         mTwoPane = true;
+         mManager = getSupportFragmentManager();
+      }
+      else
+      {
+         mTwoPane = false;
+         mManager = null;
+      }
 
       entryList = (ArrayList<EntryList>) getLastCustomNonConfigurationInstance();
       if (entryList == null)
@@ -69,12 +81,12 @@ public class MainActivity extends AppCompatActivity
             //repopulating entryList
             if (entryList.isEmpty())
             {
-               Log.d("DEBUG", "REPOPULATING DATA FROM FIREBASE");
+               //Log.d("DEBUG", "REPOPULATING DATA FROM FIREBASE");
                for (DataSnapshot postSnapShot : dataSnapshot.getChildren())
                {
-                  Log.d("DEBUG", "Key is: " + postSnapShot.getKey());
-                  Log.d("DEBUG", "child count is" + Long.toString(postSnapShot.getChildrenCount()));
-                  Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class).getAddText());
+                  //Log.d("DEBUG", "Key is: " + postSnapShot.getKey());
+                  //Log.d("DEBUG", "child count is" + Long.toString(postSnapShot.getChildrenCount()));
+                  //Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class).getAddText());
                   EntryList a = postSnapShot.getValue(EntryList.class);
                   entryList.add(a);
 
@@ -84,10 +96,10 @@ public class MainActivity extends AppCompatActivity
             //updating values in the list
             else
             {
-               Log.d("DEBUG", "UPDATING VALUE FROM FIREBAE");
+               //Log.d("DEBUG", "UPDATING VALUE FROM FIREBAE");
                for (DataSnapshot postSnapshot : dataSnapshot.getChildren())
                {
-                  Log.d("DEBUG", postSnapshot.getValue(EntryList.class).getAddText());
+                  //Log.d("DEBUG", postSnapshot.getValue(EntryList.class).getAddText());
                   entryList.set(Integer.parseInt(postSnapshot.getKey()), postSnapshot.getValue
                         (EntryList.class));
 
@@ -111,7 +123,7 @@ public class MainActivity extends AppCompatActivity
 
       //mDatabase.child("entries").child("0").push().setValue("dafaq");
 
-      myAdapter = new MyAdapter(entryList);
+      myAdapter = new MyAdapter(entryList, mTwoPane, mManager);
 
       mListView.setAdapter(myAdapter);
 
@@ -184,10 +196,10 @@ public class MainActivity extends AppCompatActivity
                      File input = new File(getFilesDir() + "/savedImage" + index);
                      input.delete();
                      //change the index number
-                     Log.d("DEBUG", "index is " + index);
+                     //Log.d("DEBUG", "index is " + index);
                      for (int num = index + 1; num < entryList.size() + 1; num++)
                      {
-                        Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
+                        //Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
                         File fixFileName = new File(getFilesDir() + "/savedImage" + num);
                         File newFileName = new File(getFilesDir() + "/savedImage" + (num - 1));
                         fixFileName.renameTo(newFileName);
@@ -215,6 +227,7 @@ public class MainActivity extends AppCompatActivity
          }
 
 
+
       };
 
       ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -226,7 +239,7 @@ public class MainActivity extends AppCompatActivity
 
 
       String key = mDatabase.push().getKey();
-      entryList.add(new EntryList(newText, false, key));
+      entryList.add(new EntryList(newText, false, key, ""));
       mDatabase.child(key).setValue(entryList.get(entryList.size() - 1));
       myAdapter.notifyDataSetChanged();
    }
@@ -278,14 +291,14 @@ public class MainActivity extends AppCompatActivity
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data)
    {
-      //super.onActivityResult(requestCode, resultCode, data);
+      super.onActivityResult(requestCode, resultCode, data);
 
       if (resultCode == RESULT_OK)
       {
          if (requestCode == 1)
          {
             int index = data.getIntExtra("key2", -1);
-            Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance().getEntry(index).getAddText() + " back.");
+            //Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance().getEntry(index).getAddText() + " back.");
             entryList.set(index, StaticEntryList.getInstance().getEntry(index));
             String key = entryList.get(index).getKey();
             mDatabase.child(key).setValue(entryList.get(index));
@@ -296,4 +309,14 @@ public class MainActivity extends AppCompatActivity
    }
 
 
+   @Override
+   public void submitChanges(int index)
+   {
+      //notify adapter changes here
+      entryList.set(index, StaticEntryList.getInstance().getEntry(index));
+      String key = entryList.get(index).getKey();
+      mDatabase.child(key).setValue(entryList.get(index));
+      myAdapter.notifyItemChanged(index);
+
+   }
 }

@@ -33,9 +33,7 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_detail);
-      Bundle bundle = new Bundle();
       final int index = getIntent().getIntExtra("key", -1);
-      bundle.putInt("key", index);
 
       FragmentManager manager = getSupportFragmentManager();
       DetailFragment fragment = (DetailFragment) manager.findFragmentById(R.id.fragment_detail);

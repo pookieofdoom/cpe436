@@ -8,14 +8,16 @@ public class EntryList {
    private String addText;
    private boolean isChecked;
    private String mKey;
+   private String descText;
 
    public EntryList(){
 
    }
-   public EntryList(String addText, boolean isChecked, String key){
+   public EntryList(String addText, boolean isChecked, String key, String descText){
       this.addText = addText;
       this.isChecked = isChecked;
       mKey = key;
+      this.descText = descText;
    }
 
    public String getAddText() {
@@ -37,5 +39,15 @@ public class EntryList {
    public void setKey(String key) { mKey = key; }
 
    public String getKey() { return mKey; }
+
+   public String getDescText()
+   {
+      return descText;
+   }
+
+   public void setDescText(String descText)
+   {
+      this.descText = descText;
+   }
 
 }

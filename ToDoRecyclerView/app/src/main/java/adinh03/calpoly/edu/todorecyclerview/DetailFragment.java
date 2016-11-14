@@ -68,7 +68,7 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       //get index using fragment contract
       final int index = this.getArguments().getInt("key");
       imageId = index;
-      Log.d("DEBUG", "this is index " + index);
+      //Log.d("DEBUG", "this is index " + index);
       mEditText.setText(StaticEntryList.getInstance().getEntry(index).getAddText());
 
       mCheckBox.setChecked(StaticEntryList.getInstance().getEntry(index).isChecked());
@@ -76,13 +76,11 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       try
       {
          File input = new File(getContext().getFilesDir() + "/savedImage" + imageId);
-         Log.d("DEBUG", input.getAbsolutePath());
          Bitmap b = BitmapFactory.decodeStream(new FileInputStream(input));
          mImageView.setImageBitmap(b);
       } catch (FileNotFoundException e)
       {
-         Log.d("DEBUG", "FILE NOT FOUND");
-
+         //do nothing
       }
 
       mSubmitButton.setOnClickListener(new View.OnClickListener()
@@ -126,12 +124,11 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
    @Override
    public void onActivityResult(int requestCode, int resultCode, Intent data)
    {
-      //super.onActivityResult(requestCode, resultCode, data);
+      super.onActivityResult(requestCode, resultCode, data);
       if (resultCode == RESULT_OK)
       {
          if (requestCode == 2)
          {
-            Log.d("DEBUG", "Picked an image");
             Uri uri = data.getData();
             mImageView.setImageURI(uri);
             try
