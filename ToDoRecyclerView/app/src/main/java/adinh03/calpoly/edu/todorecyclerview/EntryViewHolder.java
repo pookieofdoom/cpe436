@@ -42,7 +42,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder {
          @Override
          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             entry.setChecked(isChecked);
-            mDatabase.child(Integer.toString(getAdapterPosition())).setValue(entry);
+            mDatabase.child(entry.getKey()).setValue(entry);
 
          }
       });

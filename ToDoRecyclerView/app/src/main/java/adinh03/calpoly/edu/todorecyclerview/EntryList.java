@@ -7,13 +7,15 @@ package adinh03.calpoly.edu.todorecyclerview;
 public class EntryList {
    private String addText;
    private boolean isChecked;
+   private String mKey;
 
    public EntryList(){
 
    }
-   public EntryList(String addText, boolean isChecked){
+   public EntryList(String addText, boolean isChecked, String key){
       this.addText = addText;
       this.isChecked = isChecked;
+      mKey = key;
    }
 
    public String getAddText() {
@@ -31,4 +33,9 @@ public class EntryList {
    public void setChecked(boolean checked) {
       isChecked = checked;
    }
+
+   public void setKey(String key) { mKey = key; }
+
+   public String getKey() { return mKey; }
+
 }
