@@ -26,9 +26,9 @@ public class MyAdapter extends RecyclerView.Adapter<EntryViewHolder>
    public MyAdapter(ArrayList<EntryList> entry, boolean twoPane, FragmentManager manager)
    {
       //ask Tony if its a good idea to pass the bool and the manager
-      //how to do select
-      //on swipe delete and deleting
-      // additonal field 
+      //1.how to do select -> just change the background.. add description + isChecked in entry and do it onbindviewholder
+      //3.on swipe delete and deleting -> call finish on the activity -> menu stuff for deleting
+      //2. additonal edit text in the fragment ->description field in entry
       mEntry = entry;
       mTwoPane = twoPane;
       mManager = manager;
