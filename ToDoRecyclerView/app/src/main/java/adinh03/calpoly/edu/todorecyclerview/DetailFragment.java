@@ -7,9 +7,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -44,13 +45,23 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
    public interface FragmentInterface
    {
       void submitChanges(int index);
+      void deleteEntry(int index);
    }
 
    private EditText mEditText;
    private CheckBox mCheckBox;
    private Button mSubmitButton;
    private ImageView mImageView;
+   private EditText mDesc;
    private int imageId;
+   private int index;
+
+   @Override
+   public void onCreate(@Nullable Bundle savedInstanceState)
+   {
+      super.onCreate(savedInstanceState);
+      setHasOptionsMenu(true);
+   }
 
    @Nullable
    @Override
@@ -63,15 +74,21 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       mCheckBox = (CheckBox) rootView.findViewById(R.id.detailBox);
       mSubmitButton = (Button) rootView.findViewById(R.id.changeButton);
       mImageView = (ImageView) rootView.findViewById(R.id.imageDescription);
+      mDesc = (EditText) rootView.findViewById(R.id.editDesc);
 
       //final int index = getIntent().getIntExtra("key", -1);
       //get index using fragment contract
-      final int index = this.getArguments().getInt("key");
+      index = this.getArguments().getInt("key");
       imageId = index;
       //Log.d("DEBUG", "this is index " + index);
       mEditText.setText(StaticEntryList.getInstance().getEntry(index).getAddText());
 
       mCheckBox.setChecked(StaticEntryList.getInstance().getEntry(index).isChecked());
+
+      if (!StaticEntryList.getInstance().getEntry(index).getDescText().equals(""))
+      {
+         mDesc.setText(StaticEntryList.getInstance().getEntry(index).getDescText());
+      }
 
       try
       {
@@ -91,6 +108,7 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
             StaticEntryList.getInstance().getEntry(index).setAddText(mEditText.getText().toString
                   ());
             StaticEntryList.getInstance().getEntry(index).setChecked(mCheckBox.isChecked());
+            StaticEntryList.getInstance().getEntry(index).setDescText(mDesc.getText().toString());
             getContract().submitChanges(index);
 
          }
@@ -163,7 +181,28 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       }
    }
 
-   //fragment contract is for sending data back to its activity
+   @Override
+   public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+   {
+      //inflater.inflate(R.menu.list_menu, menu);
+      //
+      super.onCreateOptionsMenu(menu, inflater);
+      menu.findItem(R.id.menu_remove).setVisible(true);
+   }
 
-
+   @Override
+   public boolean onOptionsItemSelected(MenuItem item)
+   {
+      switch (item.getItemId())
+      {
+         case R.id.menu_share:
+            return false;
+         case R.id.menu_remove:
+            getContract().deleteEntry(index);
+            return true;
+         default:
+            break;
+      }
+      return false;
+   }
 }

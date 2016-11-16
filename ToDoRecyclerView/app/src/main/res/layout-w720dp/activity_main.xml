@@ -41,7 +41,6 @@
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?android:attr/activatedBackgroundIndicator"
             android:id="@+id/recyclerView">
 
         </android.support.v7.widget.RecyclerView>

@@ -9,4 +9,11 @@
         app:showAsAction="always"
         />
 
+    <item
+        android:id="@+id/menu_remove"
+        android:title="Remove"
+        android:visible="false"
+        app:showAsAction="always"
+        />
+
 </menu>

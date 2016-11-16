@@ -2,11 +2,9 @@ package adinh03.calpoly.edu.todorecyclerview;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.CheckBox;
@@ -15,8 +13,6 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
 
 /**
  * Created by Anthony on 10/17/16.
@@ -29,6 +25,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
    private DatabaseReference mDatabase;
    private boolean mTwoPane;
    private FragmentManager mManager;
+   private SparseBooleanArray selectItem = new SparseBooleanArray();
+   //private View mView;
 
    public EntryViewHolder(final View itemView, final boolean twoPane, final FragmentManager manager)
    {
@@ -36,15 +34,24 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
       addText = (TextView) itemView.findViewById(R.id.newText);
       checkBox = (CheckBox) itemView.findViewById(R.id.checkBox);
       mDatabase = FirebaseDatabase.getInstance().getReference("entries");
-      itemView.setClickable(true);
+      //itemView.setClickable(true);
       mTwoPane = twoPane;
       mManager = manager;
 
+   }
+
+   public void bind(final EntryList entry)
+   {
       itemView.setOnClickListener(new View.OnClickListener()
       {
          @Override
          public void onClick(View v)
          {
+            if(!entry.isSelected())
+            {
+               entry.setSelected(true);
+               v.setSelected(true);
+            }
             if (mTwoPane)
             {
                //do fragment stuff here
@@ -65,11 +72,6 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
          }
       });
-
-   }
-
-   public void bind(final EntryList entry)
-   {
       checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
       {
          @Override
@@ -77,7 +79,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
          {
             entry.setChecked(isChecked);
             mDatabase.child(entry.getKey()).setValue(entry);
-            if(mTwoPane)
+            if (mTwoPane)
             {
                //do fragment stuff here
                FragmentTransaction fragmentTransaction = mManager.beginTransaction();

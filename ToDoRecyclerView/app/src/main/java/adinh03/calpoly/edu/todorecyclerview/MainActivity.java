@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 // trouble deleting stuff from top of list
 public class MainActivity extends AppCompatActivity implements DetailFragment.FragmentInterface
@@ -85,8 +83,10 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
                for (DataSnapshot postSnapShot : dataSnapshot.getChildren())
                {
                   //Log.d("DEBUG", "Key is: " + postSnapShot.getKey());
-                  //Log.d("DEBUG", "child count is" + Long.toString(postSnapShot.getChildrenCount()));
-                  //Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class).getAddText());
+                  //Log.d("DEBUG", "child count is" + Long.toString(postSnapShot.getChildrenCount
+                  // ()));
+                  //Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class)
+                  // .getAddText());
                   EntryList a = postSnapShot.getValue(EntryList.class);
                   entryList.add(a);
 
@@ -149,7 +149,9 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
          public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent)
          {
             if (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN ||
-                  i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_NEXT)
+                  i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_NEXT || keyEvent
+                  .getAction() == KeyEvent.KEYCODE_DPAD_CENTER || keyEvent.getAction() ==
+                  KeyEvent.KEYCODE_ENTER)
             {
                String entry = editText.getText().toString();
                if (!entry.trim().isEmpty())
@@ -182,50 +184,10 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
             {
                //need to delete the internal storage and rename all the files inside
                //Toast.makeText(MainActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
-               AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-               alert.setMessage("Do you really want to delete this 4 ever?");
-               alert.setCancelable(true);
-               alert.setPositiveButton("Delete", new DialogInterface.OnClickListener()
-               {
-                  @Override
-                  public void onClick(DialogInterface dialogInterface, int i)
-                  {
-                     String key = entryList.get(index).getKey();
-                     entryList.remove(index);
-                     myAdapter.notifyItemRemoved(index);
-                     File input = new File(getFilesDir() + "/savedImage" + index);
-                     input.delete();
-                     //change the index number
-                     //Log.d("DEBUG", "index is " + index);
-                     for (int num = index + 1; num < entryList.size() + 1; num++)
-                     {
-                        //Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
-                        File fixFileName = new File(getFilesDir() + "/savedImage" + num);
-                        File newFileName = new File(getFilesDir() + "/savedImage" + (num - 1));
-                        fixFileName.renameTo(newFileName);
-                     }
-                     //remove from firebase but update the keys
-                     mDatabase.child(key).removeValue();
-
-
-                  }
-               });
-               alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-               {
-                  @Override
-                  public void onClick(DialogInterface dialogInterface, int i)
-                  {
-                     dialogInterface.cancel();
-                     myAdapter.notifyItemChanged(index);
-                  }
-               });
-               AlertDialog dialog = alert.create();
-               dialog.show();
-
+               deleteEntry(index);
             }
 
          }
-
 
 
       };
@@ -234,12 +196,13 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
       itemTouchHelper.attachToRecyclerView(mListView);
    }
 
+
    void addListEntry(String newText)
    {
 
 
       String key = mDatabase.push().getKey();
-      entryList.add(new EntryList(newText, false, key, ""));
+      entryList.add(new EntryList(newText, false, key, "", false));
       mDatabase.child(key).setValue(entryList.get(entryList.size() - 1));
       myAdapter.notifyDataSetChanged();
    }
@@ -263,16 +226,22 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
    }
 
 
+   @Override
    public boolean onCreateOptionsMenu(Menu menu)
    {
-      //return super.onCreateOptionsMenu(menu);
+      super.onCreateOptionsMenu(menu);
       getMenuInflater().inflate(R.menu.list_menu, menu);
-      MenuItem item = menu.findItem(R.id.menu_share);
-      item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+      return true;
+   }
+
+   @Override
+   public boolean onOptionsItemSelected(MenuItem item)
+   {
+      //return super.onOptionsItemSelected(item);
+      switch (item.getItemId())
       {
-         @Override
-         public boolean onMenuItemClick(MenuItem menuItem)
-         {
+         case R.id.menu_share:
+
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             String formatedString = FormatStringsForIntent();
@@ -280,12 +249,16 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
             sendIntent.putExtra(Intent.EXTRA_TEXT, formatedString);
             sendIntent.setType("text/plain");
             Intent.createChooser(sendIntent, "Pick what to send with");
-            startActivity(sendIntent);
-            return true;
 
-         }
-      });
-      return true;
+            startActivity(sendIntent);
+
+            return true;
+         case R.id.menu_remove:
+            return false;
+         default:
+            break;
+      }
+      return false;
    }
 
    @Override
@@ -298,13 +271,18 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
          if (requestCode == 1)
          {
             int index = data.getIntExtra("key2", -1);
-            //Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance().getEntry(index).getAddText() + " back.");
+            //Log.d("DEBUG", "main activity got values " + StaticEntryList.getInstance()
+            // .getEntry(index).getAddText() + " back.");
             entryList.set(index, StaticEntryList.getInstance().getEntry(index));
             String key = entryList.get(index).getKey();
             mDatabase.child(key).setValue(entryList.get(index));
             myAdapter.notifyItemChanged(index);
          }
 
+      }
+      else if (resultCode == 69)
+      {
+         deleteEntry(data.getIntExtra("key2", -1));
       }
    }
 
@@ -318,5 +296,57 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
       mDatabase.child(key).setValue(entryList.get(index));
       myAdapter.notifyItemChanged(index);
 
+   }
+
+   @Override
+   public void deleteEntry(final int index)
+   {
+      AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+      alert.setMessage("Do you really want to delete this 4 ever?");
+      alert.setCancelable(true);
+      alert.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+      {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i)
+         {
+            String key = entryList.get(index).getKey();
+            entryList.remove(index);
+            StaticEntryList.getInstance().setEntry(entryList);
+            myAdapter.notifyItemRemoved(index);
+            File input = new File(getFilesDir() + "/savedImage" + index);
+            input.delete();
+            //change the index number
+            //Log.d("DEBUG", "index is " + index);
+            for (int num = index + 1; num < entryList.size() + 1; num++)
+            {
+               //Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
+               File fixFileName = new File(getFilesDir() + "/savedImage" + num);
+               File newFileName = new File(getFilesDir() + "/savedImage" + (num - 1));
+               fixFileName.renameTo(newFileName);
+            }
+            //remove from firebase but update the keys
+            mDatabase.child(key).removeValue();
+
+            if (mTwoPane && getSupportFragmentManager().findFragmentById(R.id
+                  .fragment_detail) != null)
+            {
+               getSupportFragmentManager().beginTransaction().remove
+                     (getSupportFragmentManager()
+                           .findFragmentById(R.id.fragment_detail)).commit();
+            }
+
+         }
+      });
+      alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+      {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i)
+         {
+            dialogInterface.cancel();
+            myAdapter.notifyItemChanged(index);
+         }
+      });
+      AlertDialog dialog = alert.create();
+      dialog.show();
    }
 }

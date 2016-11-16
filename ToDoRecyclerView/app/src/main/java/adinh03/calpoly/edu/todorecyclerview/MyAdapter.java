@@ -1,15 +1,9 @@
 package adinh03.calpoly.edu.todorecyclerview;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -27,8 +21,7 @@ public class MyAdapter extends RecyclerView.Adapter<EntryViewHolder>
    {
       //ask Tony if its a good idea to pass the bool and the manager
       //1.how to do select -> just change the background.. add description + isChecked in entry and do it onbindviewholder
-      //3.on swipe delete and deleting -> call finish on the activity -> menu stuff for deleting
-      //2. additonal edit text in the fragment ->description field in entry
+      //3.on swipe delete and deleting -> call finish on the activity -> menu stuff for deleting -> doesn't deal with backstack
       mEntry = entry;
       mTwoPane = twoPane;
       mManager = manager;

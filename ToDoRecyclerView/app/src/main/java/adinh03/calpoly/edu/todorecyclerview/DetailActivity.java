@@ -1,31 +1,12 @@
 package adinh03.calpoly.edu.todorecyclerview;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.ImageView;
-
-import com.bumptech.glide.Glide;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import android.view.Menu;
 
 public class DetailActivity extends AppCompatActivity implements DetailFragment.FragmentInterface{
 
@@ -60,5 +41,23 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
       //this will be in the detail activtiy, this will change to fragment contract
       setResult(RESULT_OK, i);
       finish();
+   }
+
+   @Override
+   public void deleteEntry(int index)
+   {
+      Intent i = new Intent();
+      i.putExtra("key2", index);
+      //this will be in the detail activtiy, this will change to fragment contract
+      setResult(69, i);
+      finish();
+   }
+
+   @Override
+   public boolean onCreateOptionsMenu(Menu menu)
+   {
+      super.onCreateOptionsMenu(menu);
+      getMenuInflater().inflate(R.menu.list_menu, menu);
+      return true;
    }
 }
