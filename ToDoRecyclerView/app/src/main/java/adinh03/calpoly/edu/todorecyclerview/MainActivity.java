@@ -12,8 +12,10 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,7 +29,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.ArrayList;
 
-// trouble deleting stuff from top of list
 public class MainActivity extends AppCompatActivity implements DetailFragment.FragmentInterface
 {
    private RecyclerView mListView;
@@ -79,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
             //repopulating entryList
             if (entryList.isEmpty())
             {
+
+
                //Log.d("DEBUG", "REPOPULATING DATA FROM FIREBASE");
                for (DataSnapshot postSnapShot : dataSnapshot.getChildren())
                {
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
                   //Log.d("Debug", "child is " + postSnapShot.getValue(EntryList.class)
                   // .getAddText());
                   EntryList a = postSnapShot.getValue(EntryList.class);
+                  //a.setSelected(false);
                   entryList.add(a);
 
                }
@@ -194,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
 
       ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
       itemTouchHelper.attachToRecyclerView(mListView);
+
    }
 
 
@@ -282,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
       }
       else if (resultCode == 69)
       {
-         deleteEntry(data.getIntExtra("key2", -1));
+         removeEntry(data.getIntExtra("key2", -1));
       }
    }
 
@@ -294,9 +299,42 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
       entryList.set(index, StaticEntryList.getInstance().getEntry(index));
       String key = entryList.get(index).getKey();
       mDatabase.child(key).setValue(entryList.get(index));
+
       myAdapter.notifyItemChanged(index);
 
+
    }
+
+   public void removeEntry(int index)
+   {
+      String key = entryList.get(index).getKey();
+      entryList.remove(index);
+      StaticEntryList.getInstance().setEntry(entryList);
+      myAdapter.notifyItemRemoved(index);
+      File input = new File(getFilesDir() + "/savedImage" + index);
+      input.delete();
+      //change the index number
+      //Log.d("DEBUG", "index is " + index);
+      for (int num = index + 1; num < entryList.size() + 1; num++)
+      {
+         //Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
+         File fixFileName = new File(getFilesDir() + "/savedImage" + num);
+         File newFileName = new File(getFilesDir() + "/savedImage" + (num - 1));
+         fixFileName.renameTo(newFileName);
+      }
+      //remove from firebase but update the keys
+      mDatabase.child(key).removeValue();
+
+      if (mTwoPane && getSupportFragmentManager().findFragmentById(R.id
+            .fragment_detail) != null)
+      {
+         getSupportFragmentManager().beginTransaction().remove
+               (getSupportFragmentManager()
+                     .findFragmentById(R.id.fragment_detail)).commit();
+      }
+
+   }
+
 
    @Override
    public void deleteEntry(final int index)
@@ -309,32 +347,7 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.Fr
          @Override
          public void onClick(DialogInterface dialogInterface, int i)
          {
-            String key = entryList.get(index).getKey();
-            entryList.remove(index);
-            StaticEntryList.getInstance().setEntry(entryList);
-            myAdapter.notifyItemRemoved(index);
-            File input = new File(getFilesDir() + "/savedImage" + index);
-            input.delete();
-            //change the index number
-            //Log.d("DEBUG", "index is " + index);
-            for (int num = index + 1; num < entryList.size() + 1; num++)
-            {
-               //Log.d("DEBUG", "IM UPDATING THE SAVED IMAGES");
-               File fixFileName = new File(getFilesDir() + "/savedImage" + num);
-               File newFileName = new File(getFilesDir() + "/savedImage" + (num - 1));
-               fixFileName.renameTo(newFileName);
-            }
-            //remove from firebase but update the keys
-            mDatabase.child(key).removeValue();
-
-            if (mTwoPane && getSupportFragmentManager().findFragmentById(R.id
-                  .fragment_detail) != null)
-            {
-               getSupportFragmentManager().beginTransaction().remove
-                     (getSupportFragmentManager()
-                           .findFragmentById(R.id.fragment_detail)).commit();
-            }
-
+            removeEntry(index);
          }
       });
       alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()

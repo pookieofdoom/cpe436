@@ -1,12 +1,16 @@
 package adinh03.calpoly.edu.todorecyclerview;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
+
+import java.io.File;
 
 public class DetailActivity extends AppCompatActivity implements DetailFragment.FragmentInterface{
 
@@ -25,7 +29,7 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
          FragmentTransaction fragmentTransaction = manager.beginTransaction();
          fragment = DetailFragment.newInstance(index);
          fragmentTransaction.add(R.id.fragment_detail, fragment);
-         fragmentTransaction.addToBackStack(null);
+         //fragmentTransaction.addToBackStack(null);
          fragmentTransaction.commit();
       }
       //720 dp for fragment
@@ -44,13 +48,35 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
    }
 
    @Override
-   public void deleteEntry(int index)
+   public void deleteEntry(final int index)
    {
-      Intent i = new Intent();
-      i.putExtra("key2", index);
-      //this will be in the detail activtiy, this will change to fragment contract
-      setResult(69, i);
-      finish();
+      AlertDialog.Builder alert = new AlertDialog.Builder(DetailActivity.this);
+      alert.setMessage("Do you really want to delete this 4 ever?");
+      alert.setCancelable(true);
+      alert.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+      {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i)
+         {
+            Intent intent = new Intent();
+            intent.putExtra("key2", index);
+            //this will be in the detail activtiy, this will change to fragment contract
+            setResult(69, intent);
+            finish();
+
+         }
+      });
+      alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+      {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i)
+         {
+            dialogInterface.cancel();
+         }
+      });
+      AlertDialog dialog = alert.create();
+      dialog.show();
+
    }
 
    @Override

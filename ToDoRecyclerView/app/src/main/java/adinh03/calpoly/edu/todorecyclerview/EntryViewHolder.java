@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.CheckBox;
@@ -21,11 +22,10 @@ import com.google.firebase.database.FirebaseDatabase;
 public class EntryViewHolder extends RecyclerView.ViewHolder
 {
    private TextView addText;
-   private CheckBox checkBox;
+   public CheckBox checkBox;
    private DatabaseReference mDatabase;
    private boolean mTwoPane;
    private FragmentManager mManager;
-   private SparseBooleanArray selectItem = new SparseBooleanArray();
    //private View mView;
 
    public EntryViewHolder(final View itemView, final boolean twoPane, final FragmentManager manager)
@@ -42,55 +42,11 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
    public void bind(final EntryList entry)
    {
-      itemView.setOnClickListener(new View.OnClickListener()
-      {
-         @Override
-         public void onClick(View v)
-         {
-            if(!entry.isSelected())
-            {
-               entry.setSelected(true);
-               v.setSelected(true);
-            }
-            if (mTwoPane)
-            {
-               //do fragment stuff here
-               FragmentTransaction fragmentTransaction = mManager.beginTransaction();
-               DetailFragment fragment = DetailFragment.newInstance(getAdapterPosition());
-               fragmentTransaction.replace(R.id.fragment_detail, fragment);
-               //fragmentTransaction.addToBackStack(null);
-               fragmentTransaction.commit();
+      if (mTwoPane)
+         itemView.setSelected(entry.isSelected());
 
 
-            }
-            else
-            {
-               Intent i = new Intent(itemView.getContext(), DetailActivity.class);
-               i.putExtra("key", getAdapterPosition());
-               ((Activity) itemView.getContext()).startActivityForResult(i, 1);
-            }
 
-         }
-      });
-      checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-      {
-         @Override
-         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-         {
-            entry.setChecked(isChecked);
-            mDatabase.child(entry.getKey()).setValue(entry);
-            if (mTwoPane)
-            {
-               //do fragment stuff here
-               FragmentTransaction fragmentTransaction = mManager.beginTransaction();
-               DetailFragment fragment = DetailFragment.newInstance(getAdapterPosition());
-               fragmentTransaction.replace(R.id.fragment_detail, fragment);
-               //fragmentTransaction.addToBackStack(null);
-               fragmentTransaction.commit();
-            }
-
-         }
-      });
       addText.setText(entry.getAddText());
       checkBox.setChecked(entry.isChecked());
    }

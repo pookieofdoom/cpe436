@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -109,6 +110,8 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
                   ());
             StaticEntryList.getInstance().getEntry(index).setChecked(mCheckBox.isChecked());
             StaticEntryList.getInstance().getEntry(index).setDescText(mDesc.getText().toString());
+            //StaticEntryList.getInstance().getEntry(index).setSelected(false);
+            //Log.d("DEBUG2", "This is my contract " + getContract());
             getContract().submitChanges(index);
 
          }
@@ -188,6 +191,7 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       //
       super.onCreateOptionsMenu(menu, inflater);
       menu.findItem(R.id.menu_remove).setVisible(true);
+      menu.findItem(R.id.menu_share).setVisible(false);
    }
 
    @Override
@@ -205,4 +209,5 @@ public class DetailFragment extends ContractFragment<DetailFragment.FragmentInte
       }
       return false;
    }
+
 }
